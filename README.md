@@ -10,6 +10,12 @@ cd wtpn
 cargo build --release && cp ./target/release/wtpn ~/.local/bin
 ```
 
+## Usage
+
+```bash
+wtpn > outputfile.txt
+```
+
 ## NOTE
 
 Might need to apply full dates in to release date tagging if you wanna get full use out of this utility

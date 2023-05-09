@@ -1,15 +1,11 @@
 use glob::{glob_with, MatchOptions};
 use lofty::{Probe, TaggedFileExt, ItemKey};
-use std::path::Path;
+use std::env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-	let path = Path::new("/home/andrew/music/fun/some-nights/01-some-nights-intro.flac");
+    let home = env::var_os("HOME").unwrap().into_string().unwrap();
 
-	if !path.is_file() {
-		panic!("ERROR: Path is not a file!");
-	}
-
-    let globs = glob_with(&("/home/andrew/music/*/*/01-*"), MatchOptions {
+    let globs = glob_with(&(home + "/music/*/*/01-*"), MatchOptions {
         case_sensitive: false,
         require_literal_separator: false,
         require_literal_leading_dot: false,
