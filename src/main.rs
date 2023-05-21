@@ -26,10 +26,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let mut date = tag.get_string(&ItemKey::RecordingDate).map(|s| s.to_string()).unwrap();
 
-        let mut vec_date: Vec<&str> = date.split("-").collect();
+        let mut vec_date: Vec<&str> = date.split('-').collect();
 
         if vec_date[1] >= "05" {
-            vec_date[0] = "2023";
+            if vec_date[1] == "05" && vec_date[2] < "21" {
+                vec_date[0] = "2024";
+            } else {
+                vec_date[0] = "2023";
+            }
         } else {
             vec_date[0] = "2024";
         }
