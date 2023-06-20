@@ -13,6 +13,8 @@ fn print_docs() {
     eprintln!("    -y or --year     <u8>     ex. 2012");
     eprintln!("    -d or --decade   <u8>     ex. 2010");
     eprintln!("    -o or --original          output original release year");
+    eprintln!("    -t or --today             output only records that released today");
+    eprintln!("    -g or --genre    <String> ex. \"Rock\"");
 }
 
 fn get_args() -> Vec<String> {
@@ -23,6 +25,8 @@ fn get_args() -> Vec<String> {
     *   1 = decade
     *   2 = month
     *   3 = original
+    *   4 = today
+    *   5 = genre
     *
     */
     let mut args_key: Vec<String> = vec!("".to_string() ;6);
@@ -38,7 +42,9 @@ fn get_args() -> Vec<String> {
             "-y" | "--year" => args_key[0] = get_arg_value(&args, key),
             "-d" | "--decade" => args_key[1] = get_arg_value(&args, key),
             "-m" | "--month" => args_key[2] = get_arg_value(&args, key),
+            "-g" | "--genre" => args_key[5] = get_arg_value(&args, key),
             "-o" | "--original" => args_key[3] = String::from("1"),
+            "-t" | "--today" => args_key[4] = String::from("1"),
             _ => continue,
         }
     }
@@ -95,6 +101,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut date = tag.get_string(&ItemKey::RecordingDate).map(|s| s.to_string()).unwrap();
         let artist = tag.get_string(&ItemKey::TrackArtist).unwrap();
         let album = tag.get_string(&ItemKey::AlbumTitle).unwrap();
+        let genres = tag.get_string(&ItemKey::Genre).unwrap();
 
         let mut vec_date: Vec<&str> = date.split('-').collect();
 
@@ -116,8 +123,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
 
+        if !args[5].is_empty() {
+            if !genres.contains(&args[5]) {
+                continue;
+            }
+        }
+
         let month = &dt.format("%m").to_string();
         let day = &dt.format("%d").to_string();
+        let today = &dt.format("%Y-%m-%d").to_string();
 
         if args[3].is_empty() {
             if vec_date[1] >= month {
@@ -132,6 +146,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         date = format!("{}-{}-{}", vec_date[0], vec_date[1], vec_date[2]);
+
+        if args[4] == "1" {
+            if today != &date {
+                continue;
+            }
+        }
 
         list_of_songs.push(format!("{} {} - {}", date, artist, album));
     }
