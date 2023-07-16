@@ -83,7 +83,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }).unwrap();
 
     // TODO: add a way of getting the current month and day
-    let dt: DateTime<Utc> = Utc::now();
+    let dt: DateTime<Local> = chrono::offset::Local::now();
 
     for entry in globs.flatten() {
         let filename = entry.display().to_string();
@@ -105,28 +105,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let mut vec_date: Vec<&str> = date.split('-').collect();
 
-        if !args[0].is_empty() {
-            if args[0] != vec_date[0] {
-                continue;
-            }
+        if !args[0].is_empty() && args[0] != vec_date[0] {
+            continue;
         }
 
-        if !args[1].is_empty() {
-            if args[1] != vec_date[0] {
-                continue;
-            }
+        if !args[1].is_empty() &&  args[1] != vec_date[0] {
+            continue;
         }
 
-        if !args[2].is_empty() {
-            if args[2] != vec_date[1] {
-                continue;
-            }
+        if !args[2].is_empty() && args[2] != vec_date[1] {
+            continue;
         }
 
-        if !args[5].is_empty() {
-            if !genres.contains(&args[5]) {
-                continue;
-            }
+        if !args[5].is_empty() && !genres.contains(&args[5]) {
+            continue;
         }
 
         let month = &dt.format("%m").to_string();
@@ -147,10 +139,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         date = format!("{}-{}-{}", vec_date[0], vec_date[1], vec_date[2]);
 
-        if args[4] == "1" {
-            if today != &date {
-                continue;
-            }
+        if args[4] == "1" && today != &date {
+            continue;
         }
 
         list_of_songs.push(format!("{} {} - {}", date, artist, album));
