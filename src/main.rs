@@ -109,7 +109,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         }
 
-        if !args[1].is_empty() &&  args[1] != vec_date[0] {
+        if !args[1].is_empty() && args[1] != vec_date[0] {
             continue;
         }
 
