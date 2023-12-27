@@ -2,6 +2,7 @@ use chrono::prelude::*;
 use glob::{glob_with, MatchOptions};
 use lofty::{Probe, TaggedFileExt, ItemKey};
 use std::{env, process::exit};
+use chrono::{NaiveDate, Weekday, Datelike};
 
 fn print_docs() {
     eprintln!("What To Play Next\n\n");
@@ -14,6 +15,7 @@ fn print_docs() {
     eprintln!("    -d or --decade   <u8>     ex. 2010");
     eprintln!("    -o or --original          output original release year");
     eprintln!("    -t or --today             output only records that released today");
+    eprintln!("    -w or --week              output only records that released this week");
     eprintln!("    -g or --genre    <String> ex. \"Rock\"");
 }
 
@@ -27,9 +29,10 @@ fn get_args() -> Vec<String> {
     *   3 = original
     *   4 = today
     *   5 = genre
+    *   6 = genre
     *
     */
-    let mut args_key: Vec<String> = vec!("".to_string() ;6);
+    let mut args_key: Vec<String> = vec!("".to_string() ;7);
 
     // Print documentation
     if args.iter().any(|e| e == "-h") || args.iter().any(|e| e == "--help") {
@@ -45,6 +48,7 @@ fn get_args() -> Vec<String> {
             "-g" | "--genre" => args_key[5] = get_arg_value(&args, key),
             "-o" | "--original" => args_key[3] = String::from("1"),
             "-t" | "--today" => args_key[4] = String::from("1"),
+            "-w" | "--week" => args_key[6] = String::from("1"),
             _ => continue,
         }
     }
@@ -125,23 +129,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let day = &dt.format("%d").to_string();
         let today = &dt.format("%Y-%m-%d").to_string();
 
-        if args[3].is_empty() {
-            if vec_date[1] >= month {
-                if vec_date[1] == month && vec_date[2] < day {
-                    vec_date[0] = "2024";
-                } else {
-                    vec_date[0] = "2023";
-                }
-            } else {
-                vec_date[0] = "2024";
-            }
-        }
 
-        date = format!("{}-{}-{}", vec_date[0], vec_date[1], vec_date[2]);
+        if args[3].is_empty() {
+            vec_date[0] = "2023";
+            // if vec_date[1] >= month {
+            //     if vec_date[1] == month && vec_date[2] < day {
+            //         vec_date[0] = "2024";
+            //     } else {
+            //     }
+            // } else {
+            //     vec_date[0] = "2024";
+            // }
+        }
 
         if args[4] == "1" && today != &date {
             continue;
         }
+
+        if args[6] == "1" {
+            let naive_date = NaiveDate::from_ymd_opt(dt.year(), dt.month(), dt.day()).unwrap();
+            let week = naive_date.week(Weekday::Sat);
+
+            let (sat, fri) = (week.first_day(), week.last_day());
+
+            let nai_date = NaiveDate::from_ymd_opt(
+                vec_date[0].parse::<i32>().unwrap(), 
+                vec_date[1].parse::<u32>().unwrap(), 
+                vec_date[2].parse::<u32>().unwrap()
+            ).unwrap();
+
+            if !(nai_date >= sat && nai_date <= fri) {
+                continue;
+            }
+        }
+
+        date = format!("{}-{}-{}", vec_date[0], vec_date[1], vec_date[2]);
 
         list_of_songs.push(format!("{} {} - {}", date, artist, album));
     }
